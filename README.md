@@ -34,11 +34,19 @@ Steps 4 and 5 should each start their own session with no further manual action.
 
 ## Results
 
-| Event | Fired | Notes |
-| --- | --- | --- |
-| `pull_request.opened` | pending | PR #1 opened at 16:50Z |
-| `pull_request.synchronize` | pending | second commit pushed to the same branch |
+| Path | Outcome |
+| --- | --- |
+| `pull_request.opened` (PR #1, 16:50Z) | no session, no comment after 20 min |
+| `pull_request.synchronize` (16:57Z) | no session, no comment after 14 min |
+| Manual run via API (17:09Z) | comment posted in 40 seconds |
 
-A routine only reacts to the actions its trigger subscribes to. If the trigger is set to
-`opened` alone, pushing further commits fires nothing — select *all actions* on the Pull
-request category to catch both.
+Same routine, same prompt, same repo, same tools — only the entry path differed. The
+routine, its prompt, and repository access all work; webhook delivery is what fails.
+
+Root cause: the GitHub trigger will not save on the routine. The UI returns *"Routine
+saved, but the GitHub trigger couldn't be updated."* So the events had no listener, which
+is indistinguishable from a broken webhook until you compare against a manual run.
+
+Two open leads: the org's OAuth authorization for Claude may be missing (separate from
+installing the App), and every routine on this account was created through the API, none
+of which has ever held a working GitHub trigger.

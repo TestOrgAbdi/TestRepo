@@ -2,19 +2,32 @@
 
 Sandbox for verifying that Claude Code cloud routines fire on GitHub events.
 
-## Purpose
+## Background
 
-Event-based routines (`commits pushed`, `pull request opened`) require the Claude
-GitHub App to be installed on the owning org. Routines on `Zizou-PM/dentsup` never
-fired because that account only has contributor access — the app could not be
-installed there. This repo exists to confirm the trigger works when the app *is*
-installed.
+Routines on `Zizou-PM/dentsup` never fired because that account only has contributor
+access, so the Claude GitHub App could not be installed — and without the App there is
+no webhook delivery. This repo lives in an org where the App *is* installed, to confirm
+the trigger works when that prerequisite is met.
+
+## Supported events
+
+Routines subscribe to two GitHub event categories only:
+
+| Event | Fires when |
+| --- | --- |
+| Pull request | A PR is opened, closed, assigned, labeled, synchronized, or otherwise updated |
+| Release | A release is created, published, edited, or deleted |
+
+There is no raw "commits pushed" event. A plain `git push` fires nothing; commits only
+reach a routine as `pull_request.synchronize`, when they land on a branch that already
+has an open PR.
 
 ## Test procedure
 
 1. Initial commit — makes the repo non-empty so it appears in the routine repo picker
 2. Install the Claude GitHub App on `TestOrgAbdi`
-3. Create an event routine (`commits pushed`) pointing at this repo
-4. Push a second commit — this is the actual trigger test
+3. Create a routine with a Pull request trigger set to *all actions*
+4. Open a PR — fires `pull_request.opened`
+5. Push another commit to the same branch — fires `pull_request.synchronize`
 
-Step 4 should fire the routine with no further manual action.
+Steps 4 and 5 should each start their own session with no further manual action.

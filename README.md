@@ -31,15 +31,20 @@ Two routines split the work by event, so neither has to work out which case it i
 | Senior code review | `pull_request.opened` | Whole diff, all three buckets |
 | Commits pushed | `pull_request.synchronize` | `baseline..head` only, Block findings only, plus a resolution check of the previous review's items |
 
-They are coupled through the first line of the review comment:
+Each routine opens its comment with a different first line:
 
 ```
-Senior review (rev <short-sha>) - N Block, M Fix-in-PR, K Follow-up
+Senior code review:  Senior review (rev <short-sha>) - N Block, M Fix-in-PR, K Follow-up
+Commits pushed:      Senior review (rev <short-sha>) - re-review of <base>..<head>, N Block
 ```
 
-The re-review routine greps for that line and reads the SHA out of it as its baseline.
-Change the wording in one and the other stops finding a baseline — it will conclude no
-prior review exists and silently decline, which looks identical to a trigger that never
+What couples them is only the shared prefix. The re-review routine looks for the most
+recent comment beginning `Senior review` and reads the SHA out of it, so either format
+can serve as its baseline — including its own, which is how consecutive pushes chain.
+
+The suffixes are therefore free to change; `Senior review (rev <short-sha>)` is not. Drop
+or reword that prefix and the re-review routine finds no baseline, concludes no prior
+review exists, and silently declines — which looks identical to a trigger that never
 fired.
 
 Set each routine's trigger to its single action. Selecting *all actions* on either one

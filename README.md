@@ -31,3 +31,14 @@ has an open PR.
 5. Push another commit to the same branch — fires `pull_request.synchronize`
 
 Steps 4 and 5 should each start their own session with no further manual action.
+
+## Results
+
+| Event | Fired | Notes |
+| --- | --- | --- |
+| `pull_request.opened` | pending | PR #1 opened at 16:50Z |
+| `pull_request.synchronize` | pending | second commit pushed to the same branch |
+
+A routine only reacts to the actions its trigger subscribes to. If the trigger is set to
+`opened` alone, pushing further commits fires nothing — select *all actions* on the Pull
+request category to catch both.
